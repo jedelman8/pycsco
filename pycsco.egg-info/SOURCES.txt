@@ -8,5 +8,6 @@ pycsco.egg-info/requires.txt
 pycsco.egg-info/top_level.txt
 pycsco/nxos/__init__.py
 pycsco/nxos/device.py
+pycsco/nxos/nxapi.py
 pycsco/nxos/utils/__init__.py
 pycsco/nxos/utils/nxapi_lib.py
