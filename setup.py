@@ -1,7 +1,6 @@
 from distutils.core import setup
 from distutils.core import find_packages
 
-
 setup(
   name='pycsco',
   packages=find_packages(),
