@@ -1,7 +1,10 @@
 from distutils.core import setup
+from distutils.core import find_packages
+
+
 setup(
   name='pycsco',
-  packages=['pycsco'],
+  packages=find_packages(),
   version='0.11',
   description='Python modules to simplify working with Cisco NX-OS devices ',
   author='Jason Edelman',
