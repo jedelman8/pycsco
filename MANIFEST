@@ -2,4 +2,4 @@
 setup.cfg
 setup.py
 pycsco/__init__.py
-recursive-include inguri *
+recursive-include pycsco *
