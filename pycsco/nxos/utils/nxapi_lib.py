@@ -2,13 +2,13 @@
 
 
 """This module contains a number of functions.  There are zero classes
-here.  It should be noted that these functions were built for the sole
-purpose of supporting the Cisco Systems, Inc. produced Ansible modules.
+at this time.  It should be noted that these functions were built for the sole
+purpose of supporting Ansible modules (github.com/jedelman8/nxos-ansible).
 While that is the case, many of them can also be used independently of
-Ansible.  Modules that would be only relevant to Ansible would be any
-being used to return lists of commands and those that have sets/dicts
-as args with the names existing, delta, args, etc.  This should be apparent.
-Based on feedback, Cisco will keep iterating on this.
+Ansible.  You can simply do a 'from nxapi_lib import *' to see which
+functions can be used independent of Ansible.  Overtime, the goal is
+to make this more object oriented, efficient, and optimal for given sets
+of tasks.
 
 """
 try:
