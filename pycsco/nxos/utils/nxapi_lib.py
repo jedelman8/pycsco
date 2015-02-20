@@ -2570,15 +2570,18 @@ def get_commands_config_udld_interface(delta, interface, device, existing):
             command = 'udld aggressive'
         elif copper:
             if mode == 'enabled':
-                command = 'udld enable'
-            elif mode == 'disabled':
                 if existing['mode'] == 'aggressive':
-                    command = 'no udld aggressive ; no udld enable'
+                    command = 'no udld aggressive ; udld enable'
                 else:
-                    command = 'no udld enable'
+                    command = 'udld enable'
+            elif mode == 'disabled':
+                command = 'no udld enable'
         elif not copper:
             if mode == 'enabled':
-                command = 'no udld disable'
+                if existing['mode'] == 'aggressive':
+                    command = 'no udld aggressive ; no udld disable'
+                else:
+                    command = 'no udld disable'
             elif mode == 'disabled':
                 command = 'udld disable'
     if command:
