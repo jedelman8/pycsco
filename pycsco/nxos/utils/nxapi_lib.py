@@ -1128,7 +1128,7 @@ def get_commands_to_add_members(proposed, existing):
     if members_to_add_list:
         for member in members_to_add_list:
             commands.append('interface ' + member)
-            commands.append('channel-group {} mode {}'.format(
+            commands.append('channel-group {0} mode {1}'.format(
                 existing['group'], proposed['mode']))
 
     return commands
@@ -1159,7 +1159,7 @@ def get_commands_to_remove_members(proposed, existing):
     if members_to_remove_list:
         for member in members_to_remove_list:
             commands.append('interface ' + member)
-            commands.append('no channel-group {}'.format(existing['group']))
+            commands.append('no channel-group {0}'.format(existing['group']))
 
     return commands
 
@@ -1205,7 +1205,7 @@ def get_commands_if_mode_change(proposed, existing, group, mode):
 
         for member in members_with_mode_change:
             commands.append('interface ' + member)
-            commands.append('channel-group {} mode {}'.format(group, mode))
+            commands.append('channel-group {0} mode {1}'.format(group, mode))
     return commands
 
 
@@ -1363,7 +1363,7 @@ def get_vrf_description(device, vrf):
         Specific for Ansible module(s).  Not to be called otherwise.
 
     """
-    command = 'show run section vrf | begin {}'.format(vrf) \
+    command = 'show run section vrf | begin {0}'.format(vrf) \
               + ' | include description'
 
     description = None
@@ -1499,8 +1499,8 @@ def get_commands_to_config_vpc(vpc, domain, existing):
         pkl_src = existing.get('pkl_src', None)
         pkl_dest = existing.get('pkl_dest', None)
         if pkl_src and pkl_dest:
-            pkl_command = 'peer-keepalive destination {}'.format(pkl_dest) \
-                          + ' source {} vrf {}'.format(pkl_src, pkl_vrf)
+            pkl_command = 'peer-keepalive destination {0}'.format(pkl_dest) \
+                          + ' source {1} vrf {2}'.format(pkl_src, pkl_vrf)
             commands.append(pkl_command)
 
     if vpc.get('auto_recovery', None) == False:
@@ -2123,8 +2123,8 @@ def cmd_list_to_string(cmds):
     return command + ' ;'
 
 
-def get_neighbors(device, neigh_type):
-    """Gets commands to config hsrp on an interface
+def get_neighbors(device, neigh_type='cdp'):
+    """Gets neighbors from a device
 
     Args:
         device (Device): This is the device object of an NX-API enabled device
@@ -2981,7 +2981,7 @@ def full_dir_check(device, path):
     for each in dir_list:
         bpath = bpath + each + '/'
         if each + '/' in active_dir_file_list:
-            command = '{}{}'.format(preamble, bpath)
+            command = '{0}{1}'.format(preamble, bpath)
             active_dir_file_list = switch_files_list(device, command)
         else:
             valid = False, each + '/'
