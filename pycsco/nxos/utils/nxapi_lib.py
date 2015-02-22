@@ -1,14 +1,27 @@
 #!/usr/bin/env python
 
+# Copyright 2015 Jason Edelman <jedelman8@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """This module contains a number of functions.  There are zero classes
 at this time.  It should be noted that these functions were built for the sole
 purpose of supporting Ansible modules (github.com/jedelman8/nxos-ansible).
 While that is the case, many of them can also be used independently of
-Ansible.  You can simply do a 'from nxapi_lib import *' to see which
-functions can be used independent of Ansible.  Overtime, the goal is
-to make this more object oriented, efficient, and optimal for given sets
-of tasks.
+Ansible.  You can simply do a 'from pycsco.nxos.utils.nxapi_lib import *'
+to see which functions can be used independent of Ansible.  Overtime, the goal
+is to make this more object oriented, efficient, and optimal for support
+Ansible modules and in addition, general development.
 
 """
 try:
