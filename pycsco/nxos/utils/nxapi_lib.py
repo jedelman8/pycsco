@@ -2272,7 +2272,7 @@ def get_facts(device):
             temp['model'] = str(each.get('model', None))
             temp['status'] = str(each.get('status', None))
             mod_list.append(temp)
-    except TypeError:
+    except AttributeError, TypeError:
         temp = {}
         temp['ports'] = str(resource_table.get('ports', None))
         temp['type'] = str(resource_table.get('modtype', None))
@@ -2296,7 +2296,7 @@ def get_facts(device):
             temp['total_capacity'] = str(each.get('tot_capa', None))
             temp['status'] = str(each.get('ps_status', None))
             power_supply_list.append(temp)
-    except TypeError:
+    except AttributeError, TypeError:
         temp = {}
         each = resource_table['powersup']['TABLE_psinfo']['ROW_psinfo']
         temp['number'] = str(each.get('psnum', None))
@@ -2319,7 +2319,7 @@ def get_facts(device):
             temp['status'] = str(each.get('fanstatus', None))
             temp['status'] = str(each.get('ps_status', None))
             fan_list.append(temp)
-    except TypeError:
+    except AttributeError, TypeError:
         temp = {}
         each = resource_table['fandetails']['TABLE_faninfo']['ROW_faninfo']
         temp['name'] = str(each.get('fanname', None))
