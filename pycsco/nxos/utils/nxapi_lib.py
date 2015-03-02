@@ -706,12 +706,12 @@ def get_interface_mode(device, interface):
     except (KeyError, AttributeError):
         i = {}
     if i:
-        if intf_type == 'ethernet':
+        if intf_type in ['ethernet', 'portchannel']:
             mode = str(i.get('eth_mode', 'layer3'))
             if mode == 'access' or mode == 'trunk':
                 mode = 'layer2'
-            elif mode == 'loopback' or mode == 'svi':
-                mode = 'layer3'
+        elif intf_type == 'loopback' or intf_type == 'svi':
+            mode = 'layer3'
     return mode
 
 
