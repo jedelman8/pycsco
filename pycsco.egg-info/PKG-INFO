@@ -1,11 +1,11 @@
 Metadata-Version: 1.1
 Name: pycsco
-Version: 0.1.9
+Version: 0.2.0
 Summary: Python modules to simplify working with Cisco NX-OS devices 
 Home-page: https://github.com/jedelman8/pycsco
 Author: Jason Edelman
 Author-email: jedelman8@gmail.com
 License: UNKNOWN
-Download-URL: https://github.com/jedelman8/pycsco/tarball/0.1.9
+Download-URL: https://github.com/jedelman8/pycsco/tarball/0.2.0
 Description: UNKNOWN
 Platform: UNKNOWN

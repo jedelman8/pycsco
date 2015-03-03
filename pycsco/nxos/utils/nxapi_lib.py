@@ -2839,7 +2839,18 @@ def get_feature_list(device):
         features = data_dict['ins_api']['outputs']['output']['body'].get(
             'TABLE_cfcFeatureCtrlTable')['ROW_cfcFeatureCtrlTable']
     except (KeyError, AttributeError):
+        raw_list = data_dict['ins_api']['outputs']['output']['clierror'].split('\n')
+        features = []
+        for line in raw_list[2:]:
+            tmp = {}
+            split_line = line.split(' ')
+            feat = split_line[0].strip()
+            print feat
+            tmp['cfcFeatureCtrlName2'] = feat
+            features.append(tmp)
+    except:
         return []
+
     if features:
         for each in features:
             feature = str(each['cfcFeatureCtrlName2'])
