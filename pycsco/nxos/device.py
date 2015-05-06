@@ -47,13 +47,18 @@ class Device():
     def __init__(self,
                  username='cisco',
                  password='cisco',
-                 ip='192.168.200.50'):
+                 ip='192.168.200.50',
+                 protocol='http'):
+
+        if protocol not in ('http', 'https'):
+            raise ValueError('protocol must be http or https')
 
         self.username = username
         self.password = password
         self.ip = ip
+        self.protocol = protocol
         self.sw1 = NXAPI()
-        self.sw1.set_target_url('http://'+self.ip+'/ins')
+        self.sw1.set_target_url('%s://%s/ins' % (self.protocol, self.ip))
         self.sw1.set_username(self.username)
         self.sw1.set_password(self.password)
 
