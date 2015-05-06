@@ -2116,8 +2116,9 @@ def get_commands_config_hsrp(delta, interface, args):
         commands.insert(0, vcommand)
         commands.insert(0, 'interface ' + interface)
 
-    # if commands:
-    #    commands.insert(0, 'interface ' + interface)
+    if commands:
+        if not commands[0].startswith('interface'):
+            commands.insert(0, 'interface ' + interface)
 
     return commands
 
