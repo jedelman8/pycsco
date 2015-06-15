@@ -10,4 +10,7 @@ pycsco/nxos/__init__.py
 pycsco/nxos/device.py
 pycsco/nxos/nxapi.py
 pycsco/nxos/utils/__init__.py
+pycsco/nxos/utils/legacy.py
 pycsco/nxos/utils/nxapi_lib.py
+pycsco/nxos/utils/snmp.py
+pycsco/nxos/utils/textfsm_templates/__init__.py
