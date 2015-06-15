@@ -1,2 +1,4 @@
-
+include setup.cfg
+include setup.py
+include pycsco/__init__.py
 include pycsco/nxos/utils/textfsm_templates/*.tmpl
