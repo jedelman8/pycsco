@@ -27,7 +27,7 @@ def get_vtp_current_cfg(device):
 		current['domain'] = str(current_from_device['domain_name'])
 	else:
 		current['domain'] = None
-	current['password'] = get_vtp_password(device)	
+	current['vtp_password'] = get_vtp_password(device)	
 
 	return current
 

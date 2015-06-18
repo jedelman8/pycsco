@@ -20,6 +20,7 @@ try:
     import yaml
     from os.path import expanduser
     from nxapi import NXAPI
+    from error import CLIError
 except ImportError as e:
     print '***************************'
     print e
@@ -101,5 +102,5 @@ class Device():
             return data
 
         if clierror:
-            raise IOError(clierror, msg)
+            raise CLIError(clierror, msg)
         return data
