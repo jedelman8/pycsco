@@ -18,6 +18,7 @@ def get_vtp_current_cfg(device):
 	Returns:
 		dictionary of VTP configuration parameters
 	'''	
+	
 	status_dict = xmltodict.parse(device.show('show vtp status')[1])
 	current_from_device = status_dict['ins_api']['outputs']['output']['body']
 

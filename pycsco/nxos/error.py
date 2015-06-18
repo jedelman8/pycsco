@@ -4,4 +4,4 @@ class CLIError(Exception):
 		self.msg = msg
 
 	def __str__(self):
-		return self.err + " " + self.msg
+		return 'NX-OS CLI Configuration Error\n' + self.err + ' ' + self.msg
