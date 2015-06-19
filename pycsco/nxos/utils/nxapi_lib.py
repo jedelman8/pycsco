@@ -2136,6 +2136,30 @@ def cmd_list_to_string(cmds):
     command = ' ; '.join(cmds)
     return command + ' ;'
 
+def nested_cmd_list_to_string(commands):
+    cmds = ''
+    if commands:
+        cmds = ' '.join(' ; '.join(each) + ' ;'
+            for each in commands if each)
+    return cmds
+
+
+def execute_commands(device, commands):
+    """Converts a list of lists of commands into semi-colon separated string for use with NX-API
+    and exectutes the commands on a given device
+
+    Args:
+        commands(list of list(s) of strings): ordered list of list(s) of commands
+        device (Device): NX-API-enabled device on which commands are entered
+
+    Returns:
+        None
+
+    """
+    cmds = nested_cmd_list_to_string(commands)
+    if cmds:
+        device.config(cmds)
+
 
 def get_neighbors(device, neigh_type='cdp'):
     """Gets neighbors from a device

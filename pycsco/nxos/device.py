@@ -20,6 +20,7 @@ try:
     import yaml
     from os.path import expanduser
     from nxapi import NXAPI
+    from error import CLIError
 except ImportError as e:
     print '***************************'
     print e
@@ -66,28 +67,9 @@ class Device():
         # keeping to phase out programs that still use it.
         pass
 
-    def show(self, command, fmat='xml', text=False):
-
-        if text is False:
-            self.sw1.set_msg_type('cli_show')
-        elif text:
-            self.sw1.set_msg_type('cli_show_ascii')
-
-        self.sw1.set_out_format(fmat)
-        self.sw1.set_cmd(command)
-
-        return self.sw1.send_req()
-
-    def config(self, command, fmat='xml'):
-
-        self.sw1.set_msg_type('cli_conf')
-        self.sw1.set_out_format(fmat)
-        self.sw1.set_cmd(command)
-
-        # return self.sw1.send_req
-        data = self.sw1.send_req()
+    def cli_error_check(self, data_dict):
         clierror = None
-        data_dict = xmltodict.parse(data[1])
+        msg = None
 
         error_check_list = data_dict['ins_api']['outputs']['output']
         try:
@@ -97,9 +79,38 @@ class Device():
         except AttributeError:
             clierror = error_check_list.get('clierror', None)
             msg = error_check_list.get('msg', None)
-        except:
-            return data
 
         if clierror:
-            raise IOError(clierror, msg)
+            return CLIError(clierror, msg)
+
+    def show(self, command, fmat='xml', text=False):
+        if text is False:
+            self.sw1.set_msg_type('cli_show')
+        elif text:
+            self.sw1.set_msg_type('cli_show_ascii')
+
+        self.sw1.set_out_format(fmat)
+        self.sw1.set_cmd(command)
+
+        data = self.sw1.send_req()
+        data_dict = xmltodict.parse(data[1])
+        clierror = self.cli_error_check(data_dict)
+        if clierror:
+            raise clierror
+
+        return data
+       
+
+    def config(self, command, fmat='xml'):
+        self.sw1.set_msg_type('cli_conf')
+        self.sw1.set_out_format(fmat)
+        self.sw1.set_cmd(command)
+
+        # return self.sw1.send_req
+        data = self.sw1.send_req()
+        data_dict = xmltodict.parse(data[1])
+        clierror = self.cli_error_check(data_dict)
+        if clierror:
+            raise clierror
+
         return data
