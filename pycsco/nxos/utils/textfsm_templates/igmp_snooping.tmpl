@@ -1,0 +1,14 @@
+Value GROUP_TIMEOUT (never|Never|\d+)
+Value OPTIMIZE_MCAST_FLOOD (\w+)
+Value PROXY (\d+)
+
+Start
+  ^Global IGMP Snooping Information: -> TABLE
+
+TABLE
+  ^\s+Group timeout configured:\s+${GROUP_TIMEOUT}
+  ^\s+Optimised Multicast Flood .{5}\s+${OPTIMIZE_MCAST_FLOOD}
+  ^\s+Proxy General Querier enabled, mrt:\s+${PROXY} -> Record IGMP
+
+IGMP
+  ^IGMP Snooping information for vlan\s+\d+ -> Start

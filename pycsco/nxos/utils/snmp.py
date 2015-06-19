@@ -162,10 +162,6 @@ def config_snmp_user(proposed, user, reset, new):
     return commands
 
 
-    # command = 'snmp-server user {user} {group} auth {authentication} {pwd}' + 'priv {encrypt} {privacy}'
-    # snmp-server user NMS auth sha ASD234123-AAS priv aes-128 PR.asd.IVPW1234
-
-
 def get_snmp_user(device, user):
     """Retrieves snmp user configuration for a given user on a given device
 
@@ -228,13 +224,13 @@ def get_snmp_contact(device):
 
     raw_text = data_dict['ins_api']['outputs']['output']['body']
 
-
     existing = legacy.get_structured_data('snmp_contact.tmpl', raw_text)
 
     if len(existing) == 1:
         return existing[0]
 
     return existing
+
 
 def get_snmp_location(device):
     """Retrieves snmp location from a device
@@ -252,13 +248,13 @@ def get_snmp_location(device):
 
     raw_text = data_dict['ins_api']['outputs']['output']['body']
 
-
     existing = legacy.get_structured_data('snmp_location.tmpl', raw_text)
 
     if len(existing) == 1:
         return existing[0]
 
     return existing
+
 
 def get_snmp_host(device, host):
     """Retrieves snmp host configuration for a given host on a given device
@@ -280,7 +276,6 @@ def get_snmp_host(device, host):
     try:
         resource_table = data_dict['ins_api']['outputs']['output']['body'].get(
             'TABLE_host')['ROW_host']
-
 
         for each in resource_table:
             temp = {}
@@ -326,7 +321,6 @@ def get_snmp_host(device, host):
 
         resource[key] = temp
 
-
     except (KeyError, AttributeError):
         return resource
 
@@ -335,6 +329,7 @@ def get_snmp_host(device, host):
         return find
     else:
         return {}
+
 
 def remove_snmp_host(host, existing):
 
@@ -364,7 +359,7 @@ def config_snmp_host(delta, proposed, existing):
     ver = delta.get('v3', None)
     community = delta.get('community', None)
 
-    if any ([type1, version, ver, community]):
+    if any([type1, version, ver, community]):
         cmd += ' ' + (type1 or existing.get('type'))
 
         version = version or existing.get('version')
@@ -377,7 +372,7 @@ def config_snmp_host(delta, proposed, existing):
 
         if ver:
             cmd += ' '
-            cmd +=  (ver or existing.get('v3'))
+            cmd += (ver or existing.get('v3'))
 
         cmd += ' '
         cmd += (community or existing.get('community'))
@@ -401,6 +396,7 @@ def config_snmp_host(delta, proposed, existing):
 
     return commands
 
+
 def get_snmp_traps(device, group):
     """Retrieves snmp traps configuration for a given device
 
@@ -423,10 +419,11 @@ def get_snmp_traps(device, group):
             'TABLE_snmp_trap')['ROW_snmp_trap']
 
         for each in ['aaa', 'bridge', 'callhome', 'cfs', 'config', 'entity',
-                     'feature-control', 'hsrp', 'license', 'link', 'lldp', 'ospf', 'rf',
-                     'rmon', 'snmp', 'storm-control', 'stpx', 'sysmgr', 'system', 'upgrade',
-                     'vtp']:
-            resource [each] = []
+                     'feature-control', 'hsrp', 'license', 'link', 'lldp',
+                     'ospf', 'rf', 'rmon', 'snmp', 'storm-control', 'stpx',
+                     'sysmgr', 'system', 'upgrade', 'vtp']:
+
+            resource[each] = []
 
         for each in resource_table:
             temp = {}

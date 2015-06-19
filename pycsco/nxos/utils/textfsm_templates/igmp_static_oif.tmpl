@@ -1,0 +1,7 @@
+Value ROUTEMAP (\w+)
+Value PREFIX (((\d+.){3}\d+))
+Value SOURCE (((\d+.){3}\d+))
+
+Start
+  ^(\s\s)*ip igmp static-oif route-map\s+${ROUTEMAP}
+  ^(\s\s)*ip igmp static-oif\s+${PREFIX}(\ssource\s${SOURCE})? -> Record
