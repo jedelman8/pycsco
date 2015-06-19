@@ -450,15 +450,3 @@ def get_snmp_traps(device, group):
         return find
     else:
         return []
-
-if __name__ == "__main__":
-
-    device = Device(ip='n9396-1', username='cisco', password= '!cisco123!', protocol='http')
-
-    #data = get_snmp_community(device)
-    data = get_snmp_traps(device, 'vtp')
-
-
-    # data = get_snmp_user(device)
-
-    print json.dumps(data, indent=4)
