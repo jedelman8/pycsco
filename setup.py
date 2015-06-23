@@ -13,6 +13,6 @@ setup(
   package_data={'pycsco': ['nxos/utils/textfsm_templates/*.tmpl']},
   install_requires=[
       'xmltodict==0.9.2',
-      'gtextfsm==0.2.1',
+      'gtextfsm==0.2.1'
   ],
 )
