@@ -1,6 +1,3 @@
-from pycsco.nxos.device import Device
-from pycsco.nxos.utils import nxapi_lib
-
 try:
     import xmltodict
 except ImportError as e:
@@ -8,8 +5,18 @@ except ImportError as e:
     print e
     print '*' * 30
 
+__all__ = ['get_vtp_current_cfg', 'get_vtp_password']
+
 
 def config_vtp(params):
+    '''Returns the configuration string(s) for VTP configuration with the given parameters
+
+    Args:
+        params (dictionary): VTP configuration parameters
+
+    Returns:
+        A list vtp configuration strings
+    '''
     vtp_commands = []
 
     domain = params.get('domain')
@@ -28,6 +35,14 @@ def config_vtp(params):
 
 
 def remove_vtp_password(params):
+    '''Returns the configuration string(s) for removing the VTP password if one is set
+
+    Args:
+        params (dictionary): Dictionary with VTP password
+
+    Returns:
+        A list vtp configuration strings
+    '''
     vtp_commands = []
 
     password = params.get('vtp_password')
