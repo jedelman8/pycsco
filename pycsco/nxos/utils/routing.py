@@ -46,7 +46,6 @@ def _parse_vrf_static_routes(run_config):
 
     for i in range(1, len(lines)):
         line = lines[i].strip()
-        print line
         if line.startswith('ip route'):
             fields = line.split()
             prefix = fields[2]

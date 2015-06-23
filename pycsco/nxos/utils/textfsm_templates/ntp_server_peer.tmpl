@@ -1,0 +1,7 @@
+Value SERV_PEER (server|peer)
+Value PREFER (prefer)
+Value KEY_ID (\d+)
+Value VRF_NAME (\w+)
+
+Start
+  ^ntp $SERV_PEER $PREFER? .* (use-vrf $VRF_NAME)? .* (key $KEY_ID)? -> Record
