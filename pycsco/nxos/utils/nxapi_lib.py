@@ -26,6 +26,7 @@ Ansible modules and in addition, general development.
 """
 try:
     import xmltodict
+    from pycsco.nxos.error import CLIError
 except ImportError as e:
     print '*' * 30
     print e
@@ -63,7 +64,10 @@ def get_vlan(device, vid):
 
     """
     command = 'show vlan id ' + vid
-    data = device.show(command)
+    try:
+        data = device.show(command)
+    except CLIError:
+        return {}
     data_dict = xmltodict.parse(data[1])
     vlan = {}
 
@@ -253,7 +257,7 @@ def is_default(device, interface):
             return True
         else:
             return False
-    except KeyError:
+    except (KeyError, CLIError):
         # 'body' won't be there if interface doesn't exist
         # logical interface does not exist
         return 'DNE'
@@ -306,7 +310,7 @@ def get_manual_interface_attributes(device, interface):
             get_data = device.show(command, text=True)
             data_dict = xmltodict.parse(get_data[1])
             show_command = data_dict['ins_api']['outputs']['output']['body']
-        except KeyError:
+        except (KeyError, CLIError):
             return None
 
         if show_command:
@@ -375,7 +379,7 @@ def get_interface(device, intf):
         data_dict = xmltodict.parse(data[1])
         i = data_dict['ins_api']['outputs']['output']['body'].get(
             'TABLE_interface')['ROW_interface']
-    except (KeyError, AttributeError):
+    except (KeyError, AttributeError, CLIError):
         i = {}
 
     if i:
@@ -610,7 +614,7 @@ def get_ipv4_interface(device, intf):
             vrfdata = v_data['TABLE_vrf']['ROW_vrf']
         except KeyError:
             vrfdata = {}
-    except (KeyError, AttributeError):
+    except (KeyError, AttributeError, CLIError):
         interface = {}
 
     interface['interface'] = intf
@@ -703,7 +707,7 @@ def get_interface_mode(device, interface):
         data_dict = xmltodict.parse(data[1])
         i = data_dict['ins_api']['outputs']['output']['body'].get(
             'TABLE_interface')['ROW_interface']
-    except (KeyError, AttributeError):
+    except (KeyError, AttributeError, CLIError):
         i = {}
     if i:
         if intf_type in ['ethernet', 'portchannel']:
@@ -735,7 +739,7 @@ def interface_is_portchannel(device, interface):
             data_dict = xmltodict.parse(data[1])
             interface = data_dict['ins_api']['outputs']['output']['body'].get(
                 'TABLE_interface')['ROW_interface']
-        except (KeyError, AttributeError):
+        except (KeyError, AttributeError, CLIError):
             interface = None
         if interface:
             state = interface.get('eth_bundle', None)
@@ -999,7 +1003,7 @@ def get_portchannel(device, group):
         data_dict = xmltodict.parse(data[1])
         pchannel = data_dict['ins_api']['outputs']['output']['body'].get(
             'TABLE_channel')['ROW_channel']
-    except (KeyError, AttributeError):
+    except (KeyError, AttributeError, CLIError):
         pchannel = {}
 
     member_dictionary = {}
@@ -1326,7 +1330,7 @@ def get_interface_running_config(device, interface):
         final_list = []
         for each in raw_list[5:]:
             final_list.append(str(each).strip())
-    except KeyError:
+    except (KeyError, CLIError):
         return 'error'
     return final_list
 
@@ -1390,7 +1394,7 @@ def get_vrf_description(device, vrf):
                 description = full_line.split('description')[1].strip()
         else:
             description = None
-    except KeyError:
+    except (KeyError, CLIError):
         description = None
 
     return description
@@ -1417,7 +1421,7 @@ def get_vrf(device, vrf):
         data_dict = xmltodict.parse(data[1])
         get_data = data_dict['ins_api']['outputs']['output']['body'].get(
             'TABLE_vrf')['ROW_vrf']
-    except (KeyError, AttributeError):
+    except (KeyError, AttributeError, CLIError):
         return vrf
 
     if get_data:
@@ -1632,7 +1636,7 @@ def get_vpc(device):
             data = device.show(command)
             data_dict = xmltodict.parse(data[1])
             vpc_dict = data_dict['ins_api']['outputs']['output']['body']
-        except KeyError:
+        except (KeyError, CLIError):
             pkl_dest = None
             pkl_vrf = None
 
@@ -1952,7 +1956,7 @@ def get_hsrp_groups_on_interfaces(device):
                 hsrp[interface] = []
             group = str(entry['sh_group_num'])
             hsrp[interface].append(group)
-    except (KeyError, AttributeError):
+    except (KeyError, AttributeError, CLIError):
         hsrp = {}
 
     return hsrp
@@ -1998,7 +2002,7 @@ def get_hsrp_group(device, group, interface_param):
 
             hsrp.append(temp)
 
-    except (TypeError, AttributeError):
+    except (TypeError, AttributeError, CLIError):
         try:
             interface = str(get_data['sh_if_index'].lower())
             group = str(get_data['sh_group_num'])
@@ -2384,7 +2388,11 @@ def get_interface_detail(device, interface):
 
     """
     command = 'show interface ' + interface
-    xml = device.show(command)
+    try:
+        xml = device.show(command)
+    except CLIError:
+        return {}
+
     result = xmltodict.parse(xml[1])
     each = result['ins_api']['outputs']['output']['body'].get(
         'TABLE_interface')['ROW_interface']
@@ -2577,7 +2585,7 @@ def get_udld_interface(device, interface):
         interface_udld['mode'] = mode
 
     # fix except for more granular exceptions
-    except (KeyError, AttributeError):
+    except (KeyError, AttributeError, CLIError):
         interface_udld = {}
 
     return interface_udld
@@ -2750,7 +2758,7 @@ def get_mtu(device, interface):
         data_dict = xmltodict.parse(data[1])
         intf_dict = data_dict['ins_api']['outputs']['output']['body'].get(
             'TABLE_interface')['ROW_interface']
-    except (KeyError, AttributeError):
+    except (KeyError, AttributeError, CLIError):
         resource = {}
 
     if intf_dict:
@@ -2959,7 +2967,7 @@ def switch_files_list(device, path='bootflash:'):
         data = device.show(command, text=True)
         data_dict = xmltodict.parse(data[1])
         files = data_dict['ins_api']['outputs']['output']['body']
-    except KeyError:
+    except (KeyError, CLIError):
         return []
     file_list = files.split('\n')
     my_files = []
@@ -3060,7 +3068,7 @@ def create_dir(device, path):
         # None (as NOT shown in the sandbox)
         # using this the opposite how it should be used
         clierror = check.get('clierror', 'NOERROR')
-    except (KeyError, AttributeError):
+    except (KeyError, AttributeError, CLIError):
         return False
 
     if not clierror:
@@ -3093,7 +3101,7 @@ def delete_dir(device, path):
         # None (as NOT shown in the sandbox)
         # using this the opposite how it should be used
         clierror = check.get('clierror', 'NOERROR')
-    except (KeyError, AttributeError):
+    except (KeyError, AttributeError, CLIError):
         return False
 
     if not clierror:
