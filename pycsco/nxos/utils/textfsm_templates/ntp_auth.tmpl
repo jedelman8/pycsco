@@ -1,0 +1,5 @@
+Value KEY_ID (\d+)
+Value MD5STRING (\w+)
+
+Start
+  ^ntp authentication-key $KEY_ID md5 $MD5STRING -> Record
