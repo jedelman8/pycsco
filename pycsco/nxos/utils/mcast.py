@@ -44,7 +44,8 @@ def get_igmp_defaults():
     args = dict(flush_routes=flush_routes,
                 enforce_rtr_alert=enforce_rtr_alert)
 
-    default = dict((param, value) for (param, value) in args.iteritems() if value is not None)
+    default = dict((param, value) for (param, value) in args.iteritems()
+                   if value is not None)
 
     return default
 
@@ -126,6 +127,9 @@ def get_igmp_snooping(device):
 
     # existing returns a list of dictionaries
     existing = legacy.get_structured_data('igmp_snooping.tmpl', raw_text)[0]
+    if not existing.get('proxy'):
+        existing['proxy'] = '5'
+    # TODO need to add PROXY BACK INT CONFIG MODULES and ANSIBLE MOD
 
     command = 'show run all | inc snooping'
     data = device.show(command, text=True)
@@ -244,9 +248,13 @@ def get_igmp_interface(device, interface):
 
     """
     command = 'show ip igmp interface ' + interface
-    data = device.show(command)
-    data_dict = xmltodict.parse(data[1])
-    igmp = {}
+
+    try:
+        data = device.show(command)
+        data_dict = xmltodict.parse(data[1])
+        igmp = {}
+    except CLIError:
+        return {}
 
     try:
         resource = data_dict['ins_api']['outputs']['output']['body'].get(
@@ -313,7 +321,7 @@ def get_igmp_interface(device, interface):
     return igmp
 
 
-def config_igmp_interface(delta):
+def config_igmp_interface(delta, found_both, found_prefix):
     """Generates command list to configure IGMP interface settings
        for Ansible modules
 
@@ -346,14 +354,25 @@ def config_igmp_interface(delta):
     command = None
 
     for k, v in delta.iteritems():
-        if k == 'source':
+        if k in ['source', 'oif_source'] or found_both or found_prefix:
             pass
         elif k == 'prefix':
             if delta.get('source'):
                 command = CMDS.get('oif_prefix_source').format(
-                    delta.get('prefix'), delta.get('source'))
+                    delta.get('prefix'), delta.get('source')
+                    )
             else:
                 command = CMDS.get('oif_prefix').format(delta.get('prefix'))
+        elif k == 'oif_prefix':
+            if delta.get('oif_source'):
+                command = CMDS.get('oif_prefix_source').format(
+                    delta.get('oif_prefix'),
+                    delta.get('oif_source')
+                    )
+            else:
+                command = CMDS.get('oif_prefix').format(
+                    delta.get('oif_prefix')
+                    )
         elif v:
             command = CMDS.get(k).format(v)
         elif not v:
@@ -362,6 +381,21 @@ def config_igmp_interface(delta):
         if command:
             commands.append(command)
         command = None
+
+    return commands
+
+
+def config_default_igmp_interface(existing, delta, found_both, found_prefix):
+
+    commands = []
+    proposed = get_igmp_interface_defaults()
+    delta = dict(set(proposed.iteritems()).difference(existing.iteritems()))
+    if delta:
+        command = config_igmp_interface(delta, found_both, found_prefix)
+
+        if command:
+            for each in command:
+                commands.append(each)
 
     return commands
 
@@ -400,8 +434,7 @@ def get_igmp_interface_defaults():
     return default
 
 
-def config_remove_oif(oif_prefix, oif_source, oif_routemap, found_both,
-                      found_prefix):
+def config_remove_oif(existing, existing_oif_prefix_source):
     """Generates command list to remove a static-oif configuration
        for an Ansible module
 
@@ -420,17 +453,22 @@ def config_remove_oif(oif_prefix, oif_source, oif_routemap, found_both,
 
     commands = []
     command = None
-    if oif_routemap:
+    if existing.get('routemap'):
         command = 'no ip igmp static-oif route-map {0}'.format(
-                                                    oif_routemap)
-    if found_both:
-        command = 'no ip igmp static-oif {0} source {1} '.format(
-                                                    oif_prefix, oif_source)
-    elif found_prefix:
-        command = 'no ip igmp static-oif {0}'.format(oif_prefix)
-
-    if command:
-        commands.append(command)
+                                                    existing.get('routemap'))
+    if existing_oif_prefix_source:
+        for each in existing_oif_prefix_source:
+            if each.get('prefix') and each.get('source'):
+                command = 'no ip igmp static-oif {0} source {1} '.format(
+                    each.get('prefix'), each.get('source')
+                    )
+            elif each.get('prefix'):
+                command = 'no ip igmp static-oif {0}'.format(
+                    each.get('prefix')
+                    )
+            if command:
+                commands.append(command)
+            command = None
 
     return commands
 
@@ -630,7 +668,8 @@ def config_pim_interface(delta, existing, jp_bidir, isauth):
 
             if command:
                 commands.append(command)
-        elif k in ['neighbor_policy', 'jp_policy_in', 'jp_policy_out', 'neighbor_type']:
+        elif k in ['neighbor_policy', 'jp_policy_in', 'jp_policy_out',
+                   'neighbor_type']:
             if k in ['neighbor_policy', 'neighbor_type']:
                 temp = delta.get('neighbor_policy') or existing.get(
                     'neighbor_policy')

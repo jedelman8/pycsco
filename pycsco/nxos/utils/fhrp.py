@@ -106,11 +106,10 @@ def get_commands_config_vrrp(delta):
         delta (dict): vrrp params to config
 
     Returns:
-        list: ordered list of commands to config hsrp
+        list: ordered list of commands to config vrrp
 
     """
 
-    command = None
     commands = []
 
     CMDS = {
@@ -121,14 +120,24 @@ def get_commands_config_vrrp(delta):
         'auth': 'authentication text {0}'
     }
 
-    for k, v in delta.iteritems():
-        if v:
-            command = CMDS.get(k).format(v)
-        else:
-            command = 'no ' + CMDS.get(k).format(v)
+    vip = delta.get('vip')
+    prio = delta.get('priority')
+    preempt = delta.get('preempt')
+    interval = delta.get('interval')
+    auth = delta.get('auth')
 
-        if command:
-            commands.append(command)
+    if vip:
+        commands.append((CMDS.get('vip')).format(vip))
+    if prio:
+        commands.append((CMDS.get('priority')).format(prio))
+    if preempt:
+        commands.append(CMDS.get('preempt'))
+    elif preempt is False:
+        commands.append('no ' + CMDS.get('preempt'))
+    if interval:
+        commands.append((CMDS.get('interval')).format(interval))
+    if auth:
+        commands.append((CMDS.get('auth')).format(auth))
 
     return commands
 

@@ -1,0 +1,14 @@
+Value Filldown NAME (\w+)
+Value INTERFACE (\w+(\d+)?/?(\d+)?)
+Value DIRECTION (\w+)
+Value TYPE (\w+\s\w+)
+
+Start
+  ^IPV4 ACL ${NAME} -> CONFIG
+
+CONFIG
+  ^\s+Configured on interfaces\W -> ACL
+
+ACL
+  ^\s+${INTERFACE}\s-\s${DIRECTION}\s\W${TYPE}\W -> Record
+  ^\s+Active on interfaces\W -> Start
