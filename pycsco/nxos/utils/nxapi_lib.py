@@ -764,7 +764,7 @@ def get_switchport(device, port):
 
     """
 
-    command = 'show interface switchport'
+    command = 'show interface {0} switchport'.format(port)
     # The command being used here is 'show interface switcport'
     # It executes this, retrieves all interfaces, and then returns
     # the given interface when a match occurs.
@@ -776,18 +776,16 @@ def get_switchport(device, port):
     data_dict = xmltodict.parse(data[1])
     switchport = {}
     try:
-        ports = data_dict['ins_api']['outputs']['output']['body'].get(
+        port_out = data_dict['ins_api']['outputs']['output']['body'].get(
             'TABLE_interface')['ROW_interface']
-        for each in ports:
-            if each['interface'].lower() == port:
-                switchport['interface'] = str(each['interface'])
-                switchport['mode'] = str(each['oper_mode'])
-                switchport['switchport'] = str(each['switchport'])
-                switchport['access_vlan'] = str(each['access_vlan'])
-                switchport['access_vlan_name'] = str(each['access_vlan_name'])
-                switchport['native_vlan'] = str(each['native_vlan'])
-                switchport['native_vlan_name'] = str(each['native_vlan_name'])
-                switchport['trunk_vlans'] = str(each['trunk_vlans'])
+        switchport['interface'] = str(port_out['interface'])
+        switchport['mode'] = str(port_out['oper_mode'])
+        switchport['switchport'] = str(port_out['switchport'])
+        switchport['access_vlan'] = str(port_out['access_vlan'])
+        switchport['access_vlan_name'] = str(port_out['access_vlan_name'])
+        switchport['native_vlan'] = str(port_out['native_vlan'])
+        switchport['native_vlan_name'] = str(port_out['native_vlan_name'])
+        switchport['trunk_vlans'] = str(port_out['trunk_vlans'])
     except (KeyError, AttributeError):
         return switchport
 
