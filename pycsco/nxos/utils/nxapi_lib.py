@@ -39,8 +39,8 @@ __all__ = ['cmd_list_to_string', 'create_dir', 'feature_enabled',
            'get_hsrp_groups_on_interfaces', 'vlan_range_to_list',
            'switch_files_list', 'get_interface', 'get_interface_detail',
            'get_interface_type', 'get_interfaces_dict', 'get_ipv4_interface',
-           'get_list_of_vlans', 'get_min_links', 'get_mtu', 'get_neighbors',
-           'get_portchannel', 'get_portchannel_list',
+           'get_list_of_vlans', 'get_vlan_info', 'get_min_links', 'get_mtu',
+           'get_neighbors', 'get_portchannel', 'get_portchannel_list',
            'get_portchannel_vpc_config', 'get_switchport', 'get_system_mtu',
            'get_udld_global', 'get_udld_interface', 'get_vlan', 'get_vpc',
            'get_vpc_running_config', 'get_vrf_list', 'peer_link_exists',
@@ -115,6 +115,40 @@ def get_list_of_vlans(device):
 
     return vlans
 
+def get_vlan_info(device):
+    """Used to retrieve a list with information of all VLANs on a device.
+
+    Args:
+        device (Device): This is the device object of an NX-API enabled device
+            using the Device class within device.py
+
+    Returns:
+        List of dicts of all VLANs on the switch
+    """    
+    command = 'show vlan brief'
+    xml = device.show(command)
+    data_dict = xmltodict.parse(xml[1])
+    vlan_list = []
+    try:
+        resource_table = data_dict['ins_api']['outputs']['output']['body'].get(
+            'TABLE_vlanbriefxbrief')['ROW_vlanbriefxbrief']
+        for each in resource_table:
+            temp = {}
+            temp['vlan_id'] = str(each.get('vlanshowbr-vlanid', None))
+            temp['name'] = str(each.get('vlanshowbr-vlanname', None))
+            temp['admin_state'] = str(each.get('vlanshowbr-shutstate', None))
+            temp['state'] = str(each.get('vlanshowbr-vlanstate', None))
+            temp['ifidx'] = str(each.get('vlanshowplist-ifidx', None))
+            vlan_list.append(temp)
+    except AttributeError:
+        # If only vlan 1 in device NXAPI returns dict instead of list
+        temp = { 'vlan_id': str(resource_table.get('vlanshowbr-vlanid', None)),
+                 'name': str(resource_table.get('vlanshowbr-vlanname', None)),
+                 'admin_state': str(resource_table.get('vlanshowbr-shutstate', None)),
+                 'state': str(resource_table.get('vlanshowbr-vlanstate', None)),
+                 'ifidx': str(resource_table.get('vlanshowplist-ifidx', None)) }
+        vlan_list.append(temp)
+    return vlan_list
 
 def vlan_range_to_list(vlans):
     """Converts single VLAN or range of VLANs into a list
@@ -2360,21 +2394,6 @@ def get_facts(device):
         temp['status'] = str(each.get('ps_status', None))
         fan_list.append(temp)
 
-    command = 'show vlan brief'
-    xml = device.show(command)
-    result = xmltodict.parse(xml[1])
-    resource_table = result['ins_api']['outputs']['output']['body'].get('TABLE_vlanbriefxbrief')['ROW_vlanbriefxbrief']
-    vlan_list = []
-
-    for each in resource_table:
-        temp = {}
-        temp['vlan_id'] = str(each.get('vlanshowbr-vlanid', None))
-        temp['name'] = str(each.get('vlanshowbr-vlanname', None))
-        temp['admin_state'] = str(each.get('vlanshowbr-shutstate', None))
-        temp['state'] = str(each.get('vlanshowbr-vlanstate', None))
-        temp['ifidx'] = str(each.get('vlanshowplist-ifidx', None))
-        vlan_list.append(temp)
-
     facts = dict(
         os=os,
         kickstart_image=kickstart,
@@ -2386,7 +2405,7 @@ def get_facts(device):
         modules=mod_list,
         power_supply_info=power_supply_list,
         fan_info=fan_list,
-        vlan=vlan_list
+        vlan_list=get_vlan_info(device)
     )
 
     return facts
