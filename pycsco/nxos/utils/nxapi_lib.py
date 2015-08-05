@@ -195,7 +195,8 @@ def get_vlan_config_commands(device, vlan, vid):
     VLAN_ARGS = {
         'name': 'name {name}',
         'vlan_state': 'state {vlan_state}',
-        'admin_state': '{admin_state}'
+        'admin_state': '{admin_state}',
+        'mode': 'mode {mode}',
     }
 
     commands = []
@@ -2359,6 +2360,21 @@ def get_facts(device):
         temp['status'] = str(each.get('ps_status', None))
         fan_list.append(temp)
 
+    command = 'show vlan brief'
+    xml = device.show(command)
+    result = xmltodict.parse(xml[1])
+    resource_table = result['ins_api']['outputs']['output']['body'].get('TABLE_vlanbriefxbrief')['ROW_vlanbriefxbrief']
+    vlan_list = []
+
+    for each in resource_table:
+        temp = {}
+        temp['vlan_id'] = str(each.get('vlanshowbr-vlanid', None))
+        temp['name'] = str(each.get('vlanshowbr-vlanname', None))
+        temp['admin_state'] = str(each.get('vlanshowbr-shutstate', None))
+        temp['state'] = str(each.get('vlanshowbr-vlanstate', None))
+        temp['ifidx'] = str(each.get('vlanshowplist-ifidx', None))
+        vlan_list.append(temp)
+
     facts = dict(
         os=os,
         kickstart_image=kickstart,
@@ -2369,7 +2385,8 @@ def get_facts(device):
         interfaces_detail=detailed_list,
         modules=mod_list,
         power_supply_info=power_supply_list,
-        fan_info=fan_list
+        fan_info=fan_list,
+        vlan=vlan_list
     )
 
     return facts
