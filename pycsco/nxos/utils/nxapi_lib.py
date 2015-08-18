@@ -151,11 +151,11 @@ def get_vlan_info(device):
                 'name': str(resource_table.get('vlanshowbr-vlanname', None)),
                 'admin_state': str(resource_table.get('vlanshowbr-shutstate', None)),
                 'state': str(resource_table.get('vlanshowbr-vlanstate', None))}
-        if 'None' in str(each.get('vlanshowplist-ifidx', None)):
+        if 'None' in str(resource_table.get('vlanshowplist-ifidx', None)):
             temp['interfaces'] = []
         else:
             temp['interfaces'] = interface_range_to_list(
-                str(each.get('vlanshowplist-ifidx', None)))
+                str(resource_table.get('vlanshowplist-ifidx', None)))
         vlan_list.append(temp)
     return vlan_list
 
