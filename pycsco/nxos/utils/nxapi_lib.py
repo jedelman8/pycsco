@@ -26,6 +26,7 @@ Ansible modules and in addition, general development.
 """
 try:
     import xmltodict
+    import re
     from pycsco.nxos.error import CLIError
 except ImportError as e:
     print '*' * 30
@@ -39,13 +40,13 @@ __all__ = ['cmd_list_to_string', 'create_dir', 'feature_enabled',
            'get_hsrp_groups_on_interfaces', 'vlan_range_to_list',
            'switch_files_list', 'get_interface', 'get_interface_detail',
            'get_interface_type', 'get_interfaces_dict', 'get_ipv4_interface',
-           'get_list_of_vlans', 'get_min_links', 'get_mtu', 'get_neighbors',
-           'get_portchannel', 'get_portchannel_list',
+           'get_list_of_vlans', 'get_vlan_info', 'get_min_links', 'get_mtu',
+           'get_neighbors', 'get_portchannel', 'get_portchannel_list',
            'get_portchannel_vpc_config', 'get_switchport', 'get_system_mtu',
            'get_udld_global', 'get_udld_interface', 'get_vlan', 'get_vpc',
            'get_vpc_running_config', 'get_vrf_list', 'peer_link_exists',
            'interface_is_portchannel', 'is_default', 'is_interface_copper',
-           'delete_dir']
+           'delete_dir','interface_range_to_list']
 
 
 def get_vlan(device, vid):
@@ -115,6 +116,96 @@ def get_list_of_vlans(device):
 
     return vlans
 
+def get_vlan_info(device):
+    """Used to retrieve a list with information of all VLANs on a device.
+
+    Args:
+        device (Device): This is the device object of an NX-API enabled device
+            using the Device class within device.py
+
+    Returns:
+        List of dicts of all VLANs on the switch
+    """
+    command = 'show vlan brief'
+    xml = device.show(command)
+    data_dict = xmltodict.parse(xml[1])
+    vlan_list = []
+    try:
+        resource_table = data_dict['ins_api']['outputs']['output']['body'].get(
+            'TABLE_vlanbriefxbrief')['ROW_vlanbriefxbrief']
+        for each in resource_table:
+            temp = {}
+            temp['vlan_id'] = str(each.get('vlanshowbr-vlanid', None))
+            temp['name'] = str(each.get('vlanshowbr-vlanname', None))
+            temp['admin_state'] = str(each.get('vlanshowbr-shutstate', None))
+            temp['state'] = str(each.get('vlanshowbr-vlanstate', None))
+            if 'None' in str(each.get('vlanshowplist-ifidx', None)):
+                temp['interfaces'] = []
+            else:
+                temp['interfaces'] = interface_range_to_list(
+                    str(each.get('vlanshowplist-ifidx', None)))
+            vlan_list.append(temp)
+    except AttributeError:
+        # If only vlan 1 in device NXAPI returns dict instead of list
+        temp = {'vlan_id': str(resource_table.get('vlanshowbr-vlanid', None)),
+                'name': str(resource_table.get('vlanshowbr-vlanname', None)),
+                'admin_state': str(resource_table.get('vlanshowbr-shutstate', None)),
+                'state': str(resource_table.get('vlanshowbr-vlanstate', None))}
+        if 'None' in str(resource_table.get('vlanshowplist-ifidx', None)):
+            temp['interfaces'] = []
+        else:
+            temp['interfaces'] = interface_range_to_list(
+                str(resource_table.get('vlanshowplist-ifidx', None)))
+        vlan_list.append(temp)
+    return vlan_list
+
+def interface_range_to_list(interfaces):
+    """Converts single interface or range of interfaces into a list
+
+    Example:
+        Input (interfaces): 'Ethernet1/1,Ethernet1/3-4,Port-channel45'
+        Returns: ['Ethernet1/1', 'Ethernet1/3', 'Ethernet1/4', 'Port-channel45' ]
+
+    Args:
+        interfaces (str): User input parameter of a interface or range of
+        interfaces
+
+    Returns:
+        list: list of all interfaces in range
+    """
+    final = []
+    list_of_ranges = []
+    if ',' in interfaces:
+        list_of_ranges = interfaces.split(',')
+    else:
+        list_of_ranges.append(interfaces)
+    for each in list_of_ranges:
+        # check to see if it's a single interface
+        if '-' not in each:
+            final.append(each)
+        else:
+            # match physical interface ranges such as Ethernet1/1-3 and
+            # Ethernet186/1/1-5
+            if '/' in each:
+                if_name, _, if_range = each.rpartition('/')
+                low = int(if_range.split('-')[0])
+                high = int(if_range.split('-')[1])
+                for num in range(low, high+1):
+                    final.append(if_name + '/' + str(num))
+            # match logical interface ranges such as Port-Channel45-47
+            else:
+                match = re.match(r'(\D+)(\d+-?(\d+)?)', each)
+                if_name = match.group(1)
+                if_range = match.group(2)
+                if '-' in if_range:
+                    low = int(if_range.split('-')[0])
+                    high = int(if_range.split('-')[1])
+                    for num in range(low, high+1):
+                        final.append(if_name + str(num))
+                else:
+                    final.append(if_name + str(if_range))
+
+    return final
 
 def vlan_range_to_list(vlans):
     """Converts single VLAN or range of VLANs into a list
@@ -195,7 +286,8 @@ def get_vlan_config_commands(device, vlan, vid):
     VLAN_ARGS = {
         'name': 'name {name}',
         'vlan_state': 'state {vlan_state}',
-        'admin_state': '{admin_state}'
+        'admin_state': '{admin_state}',
+        'mode': 'mode {mode}'
     }
 
     commands = []
@@ -2367,7 +2459,8 @@ def get_facts(device):
         interfaces_detail=detailed_list,
         modules=mod_list,
         power_supply_info=power_supply_list,
-        fan_info=fan_list
+        fan_info=fan_list,
+        vlan_list=get_vlan_info(device)
     )
 
     return facts
