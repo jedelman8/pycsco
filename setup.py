@@ -1,5 +1,4 @@
-from distutils.core import setup
-from setuptools import find_packages
+from setuptools import setup, find_packages
 
 setup(
   name='pycsco',
@@ -13,6 +12,8 @@ setup(
   package_data={'pycsco': ['nxos/utils/textfsm_templates/*.tmpl']},
   install_requires=[
       'xmltodict==0.9.2',
-      'gtextfsm==0.2.1'
+      'gtextfsm==0.2.1',
+      'scp',
+      'paramiko'
   ],
 )
