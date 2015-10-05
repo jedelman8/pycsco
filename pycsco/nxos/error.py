@@ -12,3 +12,9 @@ class InputError(Exception):
 
     def __str__(self):
         return 'Invalid Input Error\n' + self.msg
+
+class FileTransferError(Exception):
+    pass
+
+class DiffError(Exception):
+    pass
