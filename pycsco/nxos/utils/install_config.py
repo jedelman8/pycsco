@@ -1,7 +1,6 @@
 import xmltodict
-import os
-import re
 from pycsco.nxos.error import DiffError
+
 
 def get_diff(device, cp_file):
     """Get a diff between running config and a proposed file.
@@ -11,8 +10,12 @@ def get_diff(device, cp_file):
             cp_file), text=True)[1])
     try:
         diff_out = diff_out_dict['ins_api']['outputs']['output']['body']
-    except AttributeError, KeyError:
-        raise DiffError('Could not calculate diff. It\'s possible the given file doesn\'t exist.')
+        diff_out = diff_out.split(
+            '#Generating Rollback Patch')[1].replace(
+                'Rollback Patch is Empty', '').strip()
+    except (AttributeError, KeyError):
+        raise DiffError(
+            'Could not calculate diff. It\'s possible the given file doesn\'t exist.')
 
     return diff_out
 
@@ -35,9 +38,25 @@ def rollback(device, cp_file):
 
     return False
 
+
 def save_config(device, filename):
     """Save the current running config to the given file.
     """
-    device.config('copy running-config {}'.format(filename))
+    device.show('checkpoint file {}'.format(filename), text=True)
 
 
+def get_checkpoint(device):
+    """Get a base checkpoint file to work with.
+    """
+    filename = 'temp_cp_file_from_pycsco'
+    device.show('terminal dont-ask', text=True)
+    device.show('checkpoint file ' + filename, text=True)
+
+    cp_out_dict = xmltodict.parse(device.show(
+        'show file {0}'.format(
+            filename), text=True)[1])
+
+    cp_out = cp_out_dict['ins_api']['outputs']['output']['body']
+    device.show('delete ' + filename, text=True)
+
+    return cp_out

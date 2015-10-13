@@ -480,8 +480,10 @@ def get_interface(device, intf):
         if intf_type == 'ethernet':
             interface['admin_state'] = str(i.get('admin_state',
                                                  'unable_to_get_n3K_api_bug'))
+            interface['state'] = str(i.get('state', 'error'))
             interface['description'] = str(i.get('desc', None))
             interface['duplex'] = str(i.get('eth_duplex', 'error'))
+            interface['mac_address'] = str(i.get('eth_hw_addr', 'error'))
             speed = str(i.get('eth_speed', 'error'))
             if speed != 'error':
                 interface['speed'] = get_interface_speed(speed)
