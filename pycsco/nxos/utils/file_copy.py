@@ -28,6 +28,9 @@ class FileCopy(object):
 
         return int(bytes_free)
 
+    def get_remote_size(self):
+        return self.get_flash_size()
+
     def enough_space(self):
         """Check for enough space on the remote device.
         """
@@ -37,6 +40,9 @@ class FileCopy(object):
             return False
 
         return True
+
+    def enough_remote_space(self):
+        return self.enough_space()
 
     def local_file_exists(self):
         return os.path.isfile(self.src)
@@ -54,6 +60,9 @@ class FileCopy(object):
             return True
 
         return False
+
+    def remote_file_exists(self):
+        return self.file_already_exists()
 
     def get_remote_md5(self):
         """Return the md5 sum of the remote file,
@@ -78,7 +87,7 @@ class FileCopy(object):
                     buf = f.read(blocksize)
             return m.hexdigest()
 
-    def transfer_file(self, hostname=None, username=None, password=None):
+    def transfer_file(self, hostname=None, username=None, password=None, pull=False):
         """Transfer the file to the remote device over SCP.
 
         Note:
@@ -99,9 +108,14 @@ class FileCopy(object):
         Raises:
             FileTransferError: if the transfer isn't successful.
         """
-        if not self.enough_space():
-            raise FileTransferError(
-                'Could not transfer file. Not enough space on device.')
+        if pull is False:
+            if not self.local_file_exists():
+                raise FileTransferError(
+                    'Could not transfer file. Local file doesn\'t exist.')
+
+            if not self.enough_space():
+                raise FileTransferError(
+                    'Could not transfer file. Not enough space on device.')
 
         hostname = hostname or self.device.ip
         username = username or self.device.username
@@ -119,7 +133,10 @@ class FileCopy(object):
 
         scp = SCPClient(ssh.get_transport())
         try:
-            scp.put(self.src, self.dst)
+            if pull:
+                scp.get(self.dst, self.src)
+            else:
+                scp.put(self.src, self.dst)
         except:
             raise FileTransferError(
                 'Could not transfer file. There was an error during transfer.')
@@ -127,3 +144,10 @@ class FileCopy(object):
             scp.close()
 
         return True
+
+    def send(self):
+        if not self.file_already_exists():
+            self.transfer_file()
+
+    def get(self):
+        self.transfer_file(pull=True)

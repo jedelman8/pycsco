@@ -38,6 +38,11 @@ def rollback(device, cp_file):
 
     return False
 
+def set_checkpoint(device, cp_name):
+    """Set a checkpoint for current device state.
+    """
+    device.show('terminal dont-ask', text=True)
+    device.show('checkpoint file ' + cp_name, text=True)
 
 def save_config(device, filename):
     """Save the current running config to the given file.
@@ -46,15 +51,14 @@ def save_config(device, filename):
 
 
 def get_checkpoint(device):
-    """Get a base checkpoint file to work with.
+    """Get a local base checkpoint file to work with.
+       No file is saved on remote device.
     """
     filename = 'temp_cp_file_from_pycsco'
-    device.show('terminal dont-ask', text=True)
-    device.show('checkpoint file ' + filename, text=True)
-
+    set_checkpoint(device, filename)
     cp_out_dict = xmltodict.parse(device.show(
         'show file {0}'.format(
-            filename), text=True)[1])
+            cp_name), text=True)[1])
 
     cp_out = cp_out_dict['ins_api']['outputs']['output']['body']
     device.show('delete ' + filename, text=True)
