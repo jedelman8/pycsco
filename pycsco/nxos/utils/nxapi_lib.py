@@ -2256,6 +2256,17 @@ def execute_commands(device, commands):
     if cmds:
         device.config(cmds)
 
+def get_hostname(device, with_domain=False):
+    command = 'show hostname'
+    xmlReturnData = device.show(command)
+    result = xmltodict.parse(xmlReturnData[1])
+    hostname = result['ins_api']['outputs']['output']['body']['hostname']
+
+    if not with_domain:
+        if '.' in hostname:
+            return hostname.split('.')[0]
+    return hostname
+
 
 def get_neighbors(device, neigh_type='cdp'):
     """Gets neighbors from a device
@@ -2269,6 +2280,13 @@ def get_neighbors(device, neigh_type='cdp'):
         list: ordered list of dicts (dict per neigh)
 
     """
+
+    def clean(name):
+        if '(' in name and ')' in name:
+            return name.split('(')[0]
+        else:
+            return name
+
     neighbors = []
 
     if neigh_type == 'cdp':
@@ -2281,7 +2299,7 @@ def get_neighbors(device, neigh_type='cdp'):
             for each in cdp_table:
                 temp = {}
                 local_intf = str(each['intf_id'])
-                remote_hostname = str(each['device_id'].split('.')[0])
+                remote_hostname = clean(str(each['device_id'].split('.')[0]))
                 remote_device_type = str(each['platform_id'])
                 remote_intf = str(each['port_id'])
                 temp = {'platform': remote_device_type,
@@ -2356,27 +2374,32 @@ def get_facts(device):
     hostname = resource_table.get('host_name', None)
     rr = resource_table.get('rr_reason', None)
 
-    command = 'show interface status'
-    xml = device.show(command)
-    result = xmltodict.parse(xml[1])
 
-    resource_table = result['ins_api']['outputs']['output']['body'].get(
-        'TABLE_interface')['ROW_interface']
-    interface_list = []
-    detailed_list = []
-    for each in resource_table:
-        intf = str(each.get('interface', None))
-        if intf:
-            temp = {}
-            interface_list.append(intf)
-            temp['interface'] = intf
-            temp['description'] = str(each.get('name', None))
-            temp['state'] = str(each.get('state', None))
-            temp['vlan'] = str(each.get('vlan', None))
-            temp['duplex'] = str(each.get('duplex', None))
-            temp['speed'] = str(each.get('speed', None))
-            temp['type'] = str(each.get('type', None))
-            detailed_list.append(temp)
+    command = 'show interface status'
+    try:
+        xml = device.show(command)
+        result = xmltodict.parse(xml[1])
+        resource_table = result['ins_api']['outputs']['output']['body'].get(
+            'TABLE_interface')['ROW_interface']
+        interface_list = []
+        detailed_list = []
+        for each in resource_table:
+            intf = str(each.get('interface', None))
+            if intf:
+                temp = {}
+                interface_list.append(intf)
+                temp['interface'] = intf
+                temp['description'] = str(each.get('name', None))
+                temp['state'] = str(each.get('state', None))
+                temp['vlan'] = str(each.get('vlan', None))
+                temp['duplex'] = str(each.get('duplex', None))
+                temp['speed'] = str(each.get('speed', None))
+                temp['type'] = str(each.get('type', None))
+                detailed_list.append(temp)
+    except CLIError:
+        # added this in to support NXOSv
+        detailed_list = []
+        interface_list = []
 
     command = 'show module'
     xml = device.show(command)
