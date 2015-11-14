@@ -24,7 +24,7 @@ def rollback(device, cp_file):
     """Rollback to the specified file.
     """
     rb_dict = xmltodict.parse(device.config(
-        'rollback running-config file {0}'.format(
+        'rollback running-config file {0} verbose'.format(
             cp_file))[1])
 
     rb_container = rb_dict['ins_api']['outputs']['output']
@@ -58,7 +58,7 @@ def get_checkpoint(device):
     set_checkpoint(device, filename)
     cp_out_dict = xmltodict.parse(device.show(
         'show file {0}'.format(
-            cp_name), text=True)[1])
+            filename), text=True)[1])
 
     cp_out = cp_out_dict['ins_api']['outputs']['output']['body']
     device.show('delete ' + filename, text=True)
