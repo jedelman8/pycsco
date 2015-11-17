@@ -27,7 +27,6 @@ pycsco/nxos/utils/security.py
 pycsco/nxos/utils/snmp.py
 pycsco/nxos/utils/vtp.py
 pycsco/nxos/utils/textfsm_templates/__init__.py
-pycsco/nxos/utils/textfsm_templates/aaa_host.tmpl
 pycsco/nxos/utils/textfsm_templates/acl_interface.tmpl
 pycsco/nxos/utils/textfsm_templates/igmp_global.tmpl
 pycsco/nxos/utils/textfsm_templates/igmp_snooping.tmpl

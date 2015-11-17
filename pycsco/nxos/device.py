@@ -96,10 +96,12 @@ class Device():
         self.sw1.set_cmd(command)
 
         data = self.sw1.send_req()
-        data_dict = xmltodict.parse(data[1])
-        clierror = self.cli_error_check(data_dict)
-        if clierror:
-            raise clierror
+
+        if fmat == 'xml':
+            data_dict = xmltodict.parse(data[1])
+            clierror = self.cli_error_check(data_dict)
+            if clierror:
+                raise clierror
 
         return data
 
@@ -110,10 +112,11 @@ class Device():
         self.sw1.set_cmd(command)
 
         # return self.sw1.send_req
-        data = self.sw1.send_req()
-        data_dict = xmltodict.parse(data[1])
-        clierror = self.cli_error_check(data_dict)
-        if clierror:
-            raise clierror
+        if fmat == 'xml':
+            data = self.sw1.send_req()
+            data_dict = xmltodict.parse(data[1])
+            clierror = self.cli_error_check(data_dict)
+            if clierror:
+                raise clierror
 
         return data
