@@ -49,7 +49,8 @@ class Device():
                  username='cisco',
                  password='cisco',
                  ip='192.168.200.50',
-                 protocol='http'):
+                 protocol='http',
+                 timeout=30):
 
         if protocol not in ('http', 'https'):
             raise ValueError('protocol must be http or https')
@@ -58,10 +59,12 @@ class Device():
         self.password = password
         self.ip = ip
         self.protocol = protocol
+        self.timeout = timeout
         self.sw1 = NXAPI()
         self.sw1.set_target_url('%s://%s/ins' % (self.protocol, self.ip))
         self.sw1.set_username(self.username)
         self.sw1.set_password(self.password)
+        self.sw1.set_timeout(self.timeout)
 
     def open(self):
         # keeping to phase out programs that still use it.
@@ -99,7 +102,7 @@ class Device():
             raise clierror
 
         return data
-       
+
 
     def config(self, command, fmat='xml'):
         self.sw1.set_msg_type('cli_conf')
