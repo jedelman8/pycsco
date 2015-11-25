@@ -490,7 +490,7 @@ def get_interface(device, intf):
             interface['mode'] = str(i.get('eth_mode', 'layer3'))
             if interface['mode'] == 'access' or interface['mode'] == 'trunk':
                 interface['mode'] = 'layer2'
-            elif inteface['mode'] == 'routed':
+            elif interface['mode'] == 'routed':
                 interface['mode'] = 'layer3'
         elif intf_type == 'svi':
             interface['state'] = str(i.get('svi_line_proto', 'error'))
