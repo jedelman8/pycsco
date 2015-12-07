@@ -18,6 +18,7 @@ try:
     import xmltodict
     import os.path
     import yaml
+    import json
     from os.path import expanduser
     from nxapi import NXAPI
     from error import CLIError
@@ -49,7 +50,8 @@ class Device():
                  username='cisco',
                  password='cisco',
                  ip='192.168.200.50',
-                 protocol='http'):
+                 protocol='http',
+                 timeout=30):
 
         if protocol not in ('http', 'https'):
             raise ValueError('protocol must be http or https')
@@ -58,10 +60,12 @@ class Device():
         self.password = password
         self.ip = ip
         self.protocol = protocol
+        self.timeout = timeout
         self.sw1 = NXAPI()
         self.sw1.set_target_url('%s://%s/ins' % (self.protocol, self.ip))
         self.sw1.set_username(self.username)
         self.sw1.set_password(self.password)
+        self.sw1.set_timeout(self.timeout)
 
     def open(self):
         # keeping to phase out programs that still use it.
@@ -96,24 +100,29 @@ class Device():
 
         if fmat == 'xml':
             data_dict = xmltodict.parse(data[1])
-            clierror = self.cli_error_check(data_dict)
-            if clierror:
-                raise clierror
+        elif fmat == 'json':
+            data_dict = json.loads(data[1])
+
+        clierror = self.cli_error_check(data_dict)
+        if clierror:
+            raise clierror
 
         return data
-
 
     def config(self, command, fmat='xml'):
         self.sw1.set_msg_type('cli_conf')
         self.sw1.set_out_format(fmat)
         self.sw1.set_cmd(command)
 
+        data = self.sw1.send_req()
         # return self.sw1.send_req
         if fmat == 'xml':
-            data = self.sw1.send_req()
             data_dict = xmltodict.parse(data[1])
-            clierror = self.cli_error_check(data_dict)
-            if clierror:
-                raise clierror
+        elif fmat == 'json':
+            data_dict = json.loads(data[1])
+
+        clierror = self.cli_error_check(data_dict)
+        if clierror:
+            raise clierror
 
         return data
