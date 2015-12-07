@@ -2461,7 +2461,6 @@ def get_facts(device):
             temp['hw_ver'] = str(each.get('fanhwver', None))
             temp['direction'] = str(each.get('fandir', None))
             temp['status'] = str(each.get('fanstatus', None))
-            temp['status'] = str(each.get('ps_status', None))
             fan_list.append(temp)
     except (AttributeError, TypeError):
         temp = {}
@@ -2471,7 +2470,6 @@ def get_facts(device):
         temp['hw_ver'] = str(each.get('fanhwver', None))
         temp['direction'] = str(each.get('fandir', None))
         temp['status'] = str(each.get('fanstatus', None))
-        temp['status'] = str(each.get('ps_status', None))
         fan_list.append(temp)
 
     facts = dict(
