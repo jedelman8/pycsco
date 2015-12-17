@@ -61,8 +61,17 @@ class FileCopy(object):
 
         return False
 
-    def remote_file_exists(self):
+    def already_transfered(self):
         return self.file_already_exists()
+
+    def remote_file_exists(self):
+        dir_dict = xmltodict.parse(self.device.show(
+            'dir {0}'.format(self.dst), text=True)[1])
+        dir_body = dir_dict['ins_api']['outputs']['output']['body']
+        if 'No such file' in dir_body:
+            return False
+
+        return True
 
     def get_remote_md5(self):
         """Return the md5 sum of the remote file,
@@ -146,8 +155,7 @@ class FileCopy(object):
         return True
 
     def send(self):
-        if not self.file_already_exists():
-            self.transfer_file()
+        self.transfer_file()
 
     def get(self):
         self.transfer_file(pull=True)
