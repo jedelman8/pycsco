@@ -146,8 +146,7 @@ class FileCopy(object):
         return True
 
     def send(self):
-        if not self.file_already_exists():
-            self.transfer_file()
+        self.transfer_file()
 
     def get(self):
         self.transfer_file(pull=True)
