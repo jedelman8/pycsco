@@ -1,5 +1,6 @@
 from scp import SCPClient
 from pycsco.nxos.error import FileTransferError
+from pycsco.nxos.error import CLIError
 
 import paramiko
 import hashlib
@@ -77,8 +78,16 @@ class FileCopy(object):
         """Return the md5 sum of the remote file,
         if it exists.
         """
-        md5_dict = xmltodict.parse(self.device.show(
-            'show file {0} md5sum'.format(self.dst), text=False)[1])
+        try:
+            md5_dict = xmltodict.parse(self.device.show(
+                'show file {0} md5sum'.format(self.dst), text=False)[1])
+        except CLIError as e:
+            # bug in 7.0(3)I1(2)
+            if 'Structured output unsupported' in e.msg:
+                md5_body = e.err
+                return md5_body
+            raise e
+
         md5_body = md5_dict['ins_api']['outputs']['output']['body']
         if md5_body:
             return md5_body['file_content_md5sum']
