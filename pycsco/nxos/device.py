@@ -82,17 +82,21 @@ class Device():
     def cli_error_check(self, data_dict):
         clierror = None
         msg = None
-
+        has_clierror = False
         error_check_list = data_dict['ins_api']['outputs']['output']
+
         try:
             for index, each in enumerate(error_check_list):
                 clierror = each.get('clierror', None)
                 msg = each.get('msg', None)
+                if 'clierror' in each:
+                    has_clierror = True
         except AttributeError:
             clierror = error_check_list.get('clierror', None)
             msg = error_check_list.get('msg', None)
+            has_clierror = 'clierror' in error_check_list
 
-        if clierror:
+        if clierror or has_clierror:
             return CLIError(clierror, msg, index)
 
     def show(self, command, fmat='xml', text=False):
