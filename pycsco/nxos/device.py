@@ -51,6 +51,7 @@ class Device():
                  password='cisco',
                  ip='192.168.200.50',
                  protocol='http',
+                 port=None,
                  timeout=30):
 
         if protocol not in ('http', 'https'):
@@ -62,7 +63,13 @@ class Device():
         self.protocol = protocol
         self.timeout = timeout
         self.sw1 = NXAPI()
-        self.sw1.set_target_url('%s://%s/ins' % (self.protocol, self.ip))
+        if self.port is not None:
+            self.sw1.set_target_url('%s://%s:%s/ins' % (self.protocol,
+                                                        self.ip, self.port))
+        else:
+            self.sw1.set_target_url('%s://%s/ins' % (self.protocol,
+                                                     self.ip))
+
         self.sw1.set_username(self.username)
         self.sw1.set_password(self.password)
         self.sw1.set_timeout(self.timeout)

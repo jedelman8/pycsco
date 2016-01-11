@@ -58,8 +58,16 @@ class HTTPSConnection(HTTPConnection):
                                     self.cert_file,
                                     ssl_version=ssl.PROTOCOL_SSLv3)
 
-
-httplib.HTTPSConnection = HTTPSConnection
+# Many changes to httplib were made around Python 2.6/2.7 and this monkey
+# patch breaks the code. I have not been able to figure out why the
+# originators of this code felt it necessary to add the ssl_version variable,
+# but everything seems to be working fine without it. The variable is not
+# referenced anywhere in the entire pycsco code tree. To avoid further
+# problems in the future the monkey patch has been disabled by commenting the
+# line below. The entire HTTPSConnection class should be removed sometime in
+# the future. // jonas@stenling.se
+#
+#httplib.HTTPSConnection = HTTPSConnection
 
 
 class RequestMsg:
