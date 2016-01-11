@@ -62,6 +62,7 @@ class Device():
         self.ip = ip
         self.protocol = protocol
         self.timeout = timeout
+        self.port = port
         self.sw1 = NXAPI()
         if self.port is not None:
             self.sw1.set_target_url('%s://%s:%s/ins' % (self.protocol,
