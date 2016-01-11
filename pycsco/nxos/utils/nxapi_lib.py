@@ -617,6 +617,7 @@ def get_interface_config_commands(device, interface, intf):
     commands = []
     interface = dict(interface)
     for attribute, value in interface.iteritems():
+        command = None
         if attribute == 'admin_state':
             if value == 'up':
                 command = 'no shutdown'
@@ -627,11 +628,19 @@ def get_interface_config_commands(device, interface, intf):
                 command = 'switchport'
             elif value == 'layer3':
                 command = 'no switchport'
+        elif attribute == 'description':
+            command = 'description {description}'.format(**interface)
         else:
-            command = INTERFACE_ARGS.get(attribute, 'DNE').format(**interface)
+            if attribute == 'speed':
+                command = 'speed {speed}'.format(**interface)
+            elif attribute == 'duplex':
+                command = 'duplex {duplex}'.format(**interface)
 
-        if command and command != 'DNE':
-            commands.append(command)
+        if command:
+            if attribute == 'speed':
+                commands.insert(0, command)
+            else:
+                commands.append(command)
 
     commands.insert(0, 'interface ' + intf)
 

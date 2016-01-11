@@ -77,7 +77,7 @@ class Device():
 
         error_check_list = data_dict['ins_api']['outputs']['output']
         try:
-            for each in error_check_list:
+            for index, each in enumerate(error_check_list):
                 clierror = each.get('clierror', None)
                 msg = each.get('msg', None)
         except AttributeError:
@@ -85,7 +85,7 @@ class Device():
             msg = error_check_list.get('msg', None)
 
         if clierror:
-            return CLIError(clierror, msg)
+            return CLIError(clierror, msg, index)
 
     def show(self, command, fmat='xml', text=False):
         if text is False:
