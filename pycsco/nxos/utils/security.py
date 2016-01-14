@@ -83,7 +83,7 @@ def get_acl(device, acl_name, seq_number):
                 temp['action'] = 'remark'
             else:
                 temp['action'] = each.get('permitdeny')
-                temp['proto'] = each.get('proto', each.get('proto_str'))
+                temp['proto'] = each.get('proto', each.get('proto_str', each.get('ip')))
                 temp['src'] = each.get('src_any', each.get('src_ip_prefix'))
                 temp['src_port_op'] = each.get('src_port_op')
                 temp['src_port1'] = each.get('src_port1_num')
