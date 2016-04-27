@@ -5,8 +5,12 @@ class CLIError(Exception):
         self.index = index
 
     def __str__(self):
-        return 'NX-OS CLI Configuration Error\n' + self.err + '. ' + \
-                self.msg + '. Error Found on Command Number: ' + str((self.index) + 1)
+        return '''NX-OS CLI Configuration Error\n {err}. {message}. \
+                Error Found on Command Number: {number}'''.format(
+                        err     = self.err,
+                        message = self.msg,
+                        number  = (self.index + 1)
+                )
 
 
 class InputError(Exception):
