@@ -11,7 +11,7 @@ setup(
   download_url='https://github.com/jedelman8/pycsco/tarball/0.3.4',
   package_data={'pycsco': ['nxos/utils/textfsm_templates/*.tmpl']},
   install_requires=[
-      'xmltodict==0.9.2',
+      'xmltodict>=0.9.2',
       'gtextfsm==0.2.1',
       'scp',
       'paramiko'
