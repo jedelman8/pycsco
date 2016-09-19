@@ -188,6 +188,8 @@ def interface_range_to_list(interfaces):
             # Ethernet186/1/1-5
             if '/' in each:
                 if_name, _, if_range = each.rpartition('/')
+                if_range = if_range.replace("'","")
+                if_range = if_range.replace("]","")
                 low = int(if_range.split('-')[0])
                 high = int(if_range.split('-')[1])
                 for num in range(low, high+1):
